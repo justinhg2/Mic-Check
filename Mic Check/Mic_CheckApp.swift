@@ -9,10 +9,10 @@ import SwiftUI
 
 @main
 struct Mic_CheckApp: App {
-    @State private var inputVolume: Double = 0.5
+    @StateObject private var controller = AudioInputController()
    
     private var micIcon: String {
-        if inputVolume < 0.001 {
+        if controller.currentVolume < 0.001 {
             return "mic.slash.fill"
         } else {
             return "mic.fill"
@@ -20,22 +20,34 @@ struct Mic_CheckApp: App {
     }
     
     var body: some Scene {
-        MenuBarExtra("Mic Check", systemImage: "mic") {
-            
-            HStack {
-                
-                Image(systemName: micIcon)
-                    .accessibilityLabel("Input volume")
-                    .imageScale(.medium)
-                
-                Spacer()
-                
-                Slider(value: $inputVolume)
+        MenuBarExtra {
+            VStack(spacing: 12) {
+                HStack {
+                    Image(systemName: micIcon)
+                        .accessibilityLabel("Input volume")
+                        .imageScale(.medium)
+
+                    Spacer()
+
+                    Slider(value: Binding(
+                        get: { controller.currentVolume },
+                        set: { newValue in controller.setInputVolume(newValue) }
+                    ))
                     .controlSize(.small)
-                    .frame(width: 240)
+                    .frame(width: 180)
+                    .disabled(!controller.isAdjustable)
+                }
+                .padding()
+                .padding(.horizontal)
+
             }
-            .padding()
+            .onAppear {
+                controller.refreshDefaultInputDevice()
+            }
+        } label: {
+            Label("Mic Check", systemImage: micIcon)
         }
         .menuBarExtraStyle(.window)
     }
 }
+
