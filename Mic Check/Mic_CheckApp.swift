@@ -9,7 +9,11 @@ import SwiftUI
 
 @main
 struct Mic_CheckApp: App {
-    @StateObject private var controller = AudioInputController()
+    @StateObject private var controller: AudioInputController = {
+        let c = AudioInputController()
+        c.refreshDefaultInputDevice()
+        return c
+    }()
    
     private var micIcon: String {
         if controller.currentVolume < 0.001 {
@@ -20,6 +24,7 @@ struct Mic_CheckApp: App {
     }
     
     var body: some Scene {
+        
         MenuBarExtra {
             VStack(spacing: 12) {
                 HStack {
@@ -40,9 +45,6 @@ struct Mic_CheckApp: App {
                 .padding()
                 .padding(.horizontal)
 
-            }
-            .onAppear {
-                controller.refreshDefaultInputDevice()
             }
         } label: {
             Label("Mic Check", systemImage: micIcon)
